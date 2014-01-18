@@ -33,28 +33,76 @@ package com.github.javadojo;
  */
 public class MarsRover {
 
+    public enum Turn {
+        LEFT(90), RIGHT(-90);
+
+        private int degrees;
+
+        private Turn(int degrees) {
+            this.degrees = degrees;
+        }
+
+        public int getDegrees() {
+            return degrees;
+        }
+    }
+
     static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
+    private GpsMovementData gpsData;
+    private MiniMap miniMap;
+
     public MarsRover(String operations) {
+        this.gpsData = new GpsMovementData(new Position(0, 0), Direction.EAST);
+        this.miniMap = new MiniMap(this.gpsData.getCurrentPosition());
+        runProgram(operations);
+    }
+
+    private void runProgram(String operations) {
+        for (char c : operations.toCharArray()) {
+            switch(c) {
+                case 'l':
+                    turnLeft();
+                    break;
+                case 'r':
+                    turnRight();
+                    break;
+                case 's':
+                    moveForward();
+                    break;
+                case 'S':
+                    takeSample();
+                    break;
+                default:
+                    throw new RuntimeException(String.format("Unknown command '%s'", c));
+            }
+        }
     }
 
     public String path() {
-        throw new IllegalStateException("Not implemented");
+        return this.miniMap.stringRepresentation(gpsData.getCurrentPosition());
     }
 
     public MarsRover turnLeft() {
-        throw new IllegalStateException("Not implemented");
+        this.gpsData = gpsData.turn(Turn.LEFT);
+        return this;
     }
 
     public MarsRover turnRight() {
-        throw new IllegalStateException("Not implemented");
+        this.gpsData = gpsData.turn(Turn.RIGHT);
+        return this;
     }
 
     public MarsRover moveForward() {
-        throw new IllegalStateException("Not implemented");
+        this.gpsData = gpsData.moveForward(gpsData.getCurrentOrientation());
+
+        this.miniMap.addMoveForwardWaypoint(this.gpsData);
+        return this;
     }
 
+
     public MarsRover takeSample() {
-        throw new IllegalStateException("Not implemented");
+        this.miniMap.markSamplePosition(this.gpsData.getCurrentPosition());
+        return this;
     }
 }
